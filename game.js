@@ -4,6 +4,7 @@
   const arena = document.getElementById('invaders-arena');
   const logosEl = document.getElementById('client-logos');
   const ship = document.getElementById('invaders-ship');
+  const workedWithLabel = document.querySelector('.worked-with-label');
   if (!playBtn || !arena || !logosEl || !ship) return;
 
   const RESULT_MESSAGE = 'Which brand will my ideas fly into next?';
@@ -268,6 +269,7 @@
     arena.classList.remove('is-playing');
     playBtn.classList.remove('is-gone');
     playBtn.textContent = 'Play Again';
+    if (workedWithLabel) workedWithLabel.style.display = '';
     if (resultEl) {
       resultEl.style.left = logosEl.offsetLeft + 'px';
       resultEl.style.top = logosEl.offsetTop + 'px';
@@ -296,9 +298,10 @@
     if (animId) cancelAnimationFrame(animId);
     animId = requestAnimationFrame(update);
     if (window.innerWidth <= 520) {
+      if (workedWithLabel) workedWithLabel.style.display = 'none';
       const navHeight = 110;
       const rect = arena.getBoundingClientRect();
-      const target = window.scrollY + rect.top - navHeight - 12;
+      const target = window.scrollY + rect.top - navHeight;
       window.scrollTo({ top: target, behavior: 'smooth' });
     } else {
       arena.scrollIntoView({ behavior: 'smooth', block: 'center' });
