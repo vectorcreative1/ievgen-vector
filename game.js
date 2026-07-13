@@ -295,7 +295,14 @@
     if (resultEl) resultEl.classList.remove('is-visible');
     if (animId) cancelAnimationFrame(animId);
     animId = requestAnimationFrame(update);
-    arena.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (window.innerWidth <= 520) {
+      const navHeight = 110;
+      const rect = arena.getBoundingClientRect();
+      const target = window.scrollY + rect.top - navHeight - 12;
+      window.scrollTo({ top: target, behavior: 'smooth' });
+    } else {
+      arena.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   window.addEventListener('keydown', (e) => {
