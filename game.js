@@ -316,7 +316,13 @@
   arena.addEventListener('mousemove', (e) => {
     if (active) pointerToShip(e.clientX);
   });
-  arena.addEventListener('touchmove', (e) => {
+  window.addEventListener('touchstart', (e) => {
+    if (!active) return;
+    const t = e.touches[0];
+    if (t) pointerToShip(t.clientX);
+    e.preventDefault();
+  }, { passive: false });
+  window.addEventListener('touchmove', (e) => {
     if (!active) return;
     const t = e.touches[0];
     if (t) pointerToShip(t.clientX);
