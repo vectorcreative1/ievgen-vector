@@ -19,7 +19,8 @@
   const SHOT_INTERVAL = 1100;
   const BULLET_SPEED = 2.6;
   const BULLET_ACCEL = 0.15;
-  const PAIN_DURATION = 380;
+  const PAIN_DURATION = 900;
+  const HIT_SHOT_BLOCK = 1200;
   const IDEA_DURATION = 150;
   const BURST_COLORS = ['#000', '#e3151a', '#f3e600'];
   const FEEDBACK_BURST_COLORS = ['#e3151a'];
@@ -35,6 +36,7 @@
   let shipSpeed = 6;
   let wasMoving = false;
   let lastShot = 0;
+  let shotBlockedUntil = 0;
   let lastEnemyShot = 0;
   let painTimer = null;
   let ideaTimer = null;
@@ -188,7 +190,7 @@
       l.el.style.transform = `translate(${formationX}px, ${wobbleY}px) scale(${logoScale})`;
     });
 
-    if (ts - lastShot > SHOT_INTERVAL) {
+    if (ts - lastShot > SHOT_INTERVAL && ts > shotBlockedUntil) {
       spawnBullet();
       lastShot = ts;
     }
@@ -240,6 +242,7 @@
         b.hit = true;
         triggerShake();
         triggerPain();
+        shotBlockedUntil = ts + HIT_SHOT_BLOCK;
         spawnBurst(shipX + shipW() / 2, sTop + shipH() / 2, FEEDBACK_BURST_COLORS);
       }
     });
@@ -295,6 +298,7 @@
     wobbleY = 0;
     wasMoving = false;
     lastShot = 0;
+    shotBlockedUntil = 0;
     lastEnemyShot = 0;
     centerShip();
     active = true;
