@@ -196,7 +196,8 @@
     }
 
     const aliveLogos = logos.filter((l) => l.alive);
-    if (ts - lastEnemyShot > 900 && aliveLogos.length) {
+    const enemyShotInterval = aliveLogos.length === 1 ? 2200 : aliveLogos.length === 2 ? 1500 : 900;
+    if (ts - lastEnemyShot > enemyShotInterval && aliveLogos.length) {
       spawnFeedback(aliveLogos[Math.floor(Math.random() * aliveLogos.length)]);
       lastEnemyShot = ts;
     }
