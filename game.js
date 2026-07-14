@@ -18,6 +18,7 @@
   const FEEDBACK_SPEED = 2.4;
   const SHOT_INTERVAL = 1100;
   const BULLET_SPEED = 2.6;
+  const BULLET_ACCEL = 0.15;
   const PAIN_DURATION = 380;
   const IDEA_DURATION = 150;
   const BURST_COLORS = ['#000', '#e3151a', '#f3e600'];
@@ -47,8 +48,14 @@
     return 1;
   }
 
+  function shipW() { return window.innerWidth <= 520 ? 105 : SHIP_W; }
+  function shipH() { return window.innerWidth <= 520 ? 156 : SHIP_H; }
+  function shipBottom() { return window.innerWidth <= 520 ? -70 : SHIP_BOTTOM; }
+  function feedbackW() { return window.innerWidth <= 520 ? 11 : FEEDBACK_W; }
+  function feedbackH() { return window.innerWidth <= 520 ? 75 : FEEDBACK_H; }
+
   function centerShip() {
-    shipX = arena.clientWidth / 2 - SHIP_W / 2;
+    shipX = arena.clientWidth / 2 - shipW() / 2;
     ship.style.left = shipX + 'px';
   }
   centerShip();
@@ -76,24 +83,24 @@
   }
 
   function shipTop() {
-    return arena.clientHeight - SHIP_H - SHIP_BOTTOM;
+    return arena.clientHeight - shipH() - shipBottom();
   }
 
   function spawnBullet() {
     const el = document.createElement('div');
     el.className = 'invaders-bullet';
-    const x = shipX + SHIP_W / 2 - BULLET_W / 2;
+    const x = shipX + shipW() / 2 - BULLET_W / 2;
     const y = shipTop() - BULLET_H + 10;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     arena.appendChild(el);
-    bullets.push({ el, x, y });
+    bullets.push({ el, x, y, speed: BULLET_SPEED });
     triggerIdea();
   }
 
   function spawnFeedback(logo) {
     const r = baseRect(logo.el);
-    const x = r.left + formationX + (r.right - r.left) / 2 - FEEDBACK_W / 2;
+    const x = r.left + formationX + (r.right - r.left) / 2 - feedbackW() / 2;
     const y = r.bottom + wobbleY;
     const el = document.createElement('div');
     el.className = 'invaders-feedback';
@@ -161,7 +168,7 @@
 
     if (keys.left) shipX -= shipSpeed;
     if (keys.right) shipX += shipSpeed;
-    shipX = Math.max(0, Math.min(arena.clientWidth - SHIP_W, shipX));
+    shipX = Math.max(0, Math.min(arena.clientWidth - shipW(), shipX));
     ship.style.left = shipX + 'px';
 
     const isMoving = !!(keys.left || keys.right);
@@ -193,7 +200,8 @@
     }
 
     bullets.forEach((b) => {
-      b.y -= BULLET_SPEED;
+      b.speed += BULLET_ACCEL;
+      b.y -= b.speed;
       b.el.style.top = b.y + 'px';
     });
     enemyBullets.forEach((b) => {
@@ -226,13 +234,13 @@
       if (b.hit) return;
       const sTop = shipTop();
       if (
-        b.x + FEEDBACK_W > shipX && b.x < shipX + SHIP_W &&
-        b.y < sTop + SHIP_H && b.y + FEEDBACK_H > sTop
+        b.x + feedbackW() > shipX && b.x < shipX + shipW() &&
+        b.y < sTop + shipH() && b.y + feedbackH() > sTop
       ) {
         b.hit = true;
         triggerShake();
         triggerPain();
-        spawnBurst(shipX + SHIP_W / 2, sTop + SHIP_H / 2, FEEDBACK_BURST_COLORS);
+        spawnBurst(shipX + shipW() / 2, sTop + shipH() / 2, FEEDBACK_BURST_COLORS);
       }
     });
 
@@ -298,7 +306,7 @@
     if (window.innerWidth <= 520) {
       const navHeight = 110;
       const rect = arena.getBoundingClientRect();
-      const target = window.scrollY + rect.top - navHeight + 140;
+      const target = window.scrollY + rect.top - navHeight + 30;
       window.scrollTo({ top: target, behavior: 'smooth' });
     } else {
       arena.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -317,7 +325,7 @@
 
   function pointerToShip(clientX) {
     const rect = arena.getBoundingClientRect();
-    shipX = Math.max(0, Math.min(arena.clientWidth - SHIP_W, clientX - rect.left - SHIP_W / 2));
+    shipX = Math.max(0, Math.min(arena.clientWidth - shipW(), clientX - rect.left - shipW() / 2));
   }
 
   arena.addEventListener('mousemove', (e) => {
@@ -327,14 +335,12 @@
     if (!active) return;
     const t = e.touches[0];
     if (t) pointerToShip(t.clientX);
-    e.preventDefault();
-  }, { passive: false });
+  }, { passive: true });
   window.addEventListener('touchmove', (e) => {
     if (!active) return;
     const t = e.touches[0];
     if (t) pointerToShip(t.clientX);
-    e.preventDefault();
-  }, { passive: false });
+  }, { passive: true });
 
   playBtn.addEventListener('click', () => {
     if (!active) startGame();
